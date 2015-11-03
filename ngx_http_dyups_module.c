@@ -1131,19 +1131,19 @@ ngx_http_dyups_body_handler(ngx_http_request_t *r)
         goto finish;
     }
 
-    if (res->nelts != 2) {
+    /*if (res->nelts != 2) {
         ngx_str_set(&rv, "not support this interface");
         status = NGX_HTTP_NOT_FOUND;
         goto finish;
     }
 
-    /*
       url: /upstream
       body: server ip:port weight
-    */
 
+    */
     value = res->elts;
 
+    /*
     if (value[0].len != 8
         || ngx_strncasecmp(value[0].data, (u_char *) "upstream", 8) != 0)
     {
@@ -1151,8 +1151,9 @@ ngx_http_dyups_body_handler(ngx_http_request_t *r)
         status = NGX_HTTP_NOT_FOUND;
         goto finish;
     }
+    */
 
-    name = value[1];
+    name = value[(res->nelts)-1];
 
     ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
                   "[dyups] post upstream name: %V", &name);
