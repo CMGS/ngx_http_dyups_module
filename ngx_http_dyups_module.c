@@ -766,44 +766,42 @@ ngx_http_dyups_do_get(ngx_http_request_t *r, ngx_array_t *resource)
     buf = NULL;
     value = resource->elts;
 
-    if (value[0].len == 4
-        && ngx_strncasecmp(value[0].data, (u_char *) "list", 4) == 0)
+    if (ngx_strncasecmp(value[(resource->nelts)-1].data, (u_char *) "list", 4) == 0)
     {
         buf = ngx_http_dyups_show_list(r);
         if (buf == NULL) {
             status = NGX_HTTP_INTERNAL_SERVER_ERROR;
             goto finish;
         }
-    }
+    } else {
 
-    if (value[0].len == 6
-        && ngx_strncasecmp(value[0].data, (u_char *) "detail", 6) == 0)
-    {
-        buf = ngx_http_dyups_show_detail(r);
-        if (buf == NULL) {
-            status = NGX_HTTP_INTERNAL_SERVER_ERROR;
-            goto finish;
-        }
-    }
+        if (ngx_strncasecmp(value[(resource->nelts)-1].data, (u_char *) "detail", 6) == 0)
+        {
+            buf = ngx_http_dyups_show_detail(r);
+            if (buf == NULL) {
+                status = NGX_HTTP_INTERNAL_SERVER_ERROR;
+                goto finish;
+            }
+        } else {
 
-    if (value[0].len == 8
-        && ngx_strncasecmp(value[0].data, (u_char *) "upstream", 8) == 0)
-    {
-        if (resource->nelts != 2) {
-            status = NGX_HTTP_NOT_FOUND;
-            goto finish;
-        }
+            if (resource->nelts > 2
+                && ngx_strncasecmp(value[(resource->nelts)-2].data, (u_char *) "upstream", 8) == 0)
+            {
+                duscf = ngx_dyups_find_upstream(&value[(resource->nelts)-1], &dumy);
+                if (duscf == NULL || duscf->deleted) {
+                    status = NGX_HTTP_NOT_FOUND;
+                    goto finish;
+                }
 
-        duscf = ngx_dyups_find_upstream(&value[1], &dumy);
-        if (duscf == NULL || duscf->deleted) {
-            status = NGX_HTTP_NOT_FOUND;
-            goto finish;
-        }
-
-        buf = ngx_http_dyups_show_upstream(r, duscf);
-        if (buf == NULL) {
-            status = NGX_HTTP_INTERNAL_SERVER_ERROR;
-            goto finish;
+                buf = ngx_http_dyups_show_upstream(r, duscf);
+                if (buf == NULL) {
+                    status = NGX_HTTP_INTERNAL_SERVER_ERROR;
+                    goto finish;
+                }
+            } else {
+                status = NGX_HTTP_NOT_FOUND;
+                goto finish;
+            }
         }
     }
 
