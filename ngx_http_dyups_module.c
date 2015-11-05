@@ -1022,28 +1022,9 @@ ngx_http_dyups_do_delete(ngx_http_request_t *r, ngx_array_t *resource)
         return rc;
     }
 
-    if (resource->nelts != 2) {
-        ngx_str_set(&rv, "not support this interface");
-        status = NGX_HTTP_NOT_ALLOWED;
-        goto finish;
-    }
-
     value = resource->elts;
-
-    if (value[0].len != 8
-        || ngx_strncasecmp(value[0].data, (u_char *) "upstream", 8) != 0)
-    {
-        ngx_str_set(&rv, "not support this api");
-        status = NGX_HTTP_NOT_ALLOWED;
-        goto finish;
-    }
-
-    name = value[1];
-
+    name = value[(resource->nelts)-1];
     status = ngx_dyups_delete_upstream(&name, &rv);
-
-finish:
-
     r->headers_out.status = status;
     r->headers_out.content_length_n = rv.len;
 
@@ -1131,28 +1112,7 @@ ngx_http_dyups_body_handler(ngx_http_request_t *r)
         goto finish;
     }
 
-    /*if (res->nelts != 2) {
-        ngx_str_set(&rv, "not support this interface");
-        status = NGX_HTTP_NOT_FOUND;
-        goto finish;
-    }
-
-      url: /upstream
-      body: server ip:port weight
-
-    */
     value = res->elts;
-
-    /*
-    if (value[0].len != 8
-        || ngx_strncasecmp(value[0].data, (u_char *) "upstream", 8) != 0)
-    {
-        ngx_str_set(&rv, "not support this api");
-        status = NGX_HTTP_NOT_FOUND;
-        goto finish;
-    }
-    */
-
     name = value[(res->nelts)-1];
 
     ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
